@@ -25,8 +25,8 @@ contract HookMiningSample is Script {
 
 		// Find an address + salt using HookMiner that meets our flags criteria
         address CREATE2_DEPLOYER = 0x4e59b44847b379578588920cA78FbF26c0B4956C; //create2 deployer address in Sepolia
-        address _bondingCurve = 0xfC47d03bd4C8a7E62A62f29000ceBa4D84142343; //replace with actual BondingCurve address
-        address volumeOracle = 0x7E287bb62F87916c190b45BA0921F862Fb4b9Aa5; // Replace with actual VolumeOracle address 
+        address _bondingCurve = 0x434b002AEa2D9721104bCAb8eAE8576FE884Ffe4; //replace with actual BondingCurve address
+        address volumeOracle = 0xEe5ED5Ebc40eaA7aDEa3ab92dF5B33f20E380E7c; // Replace with actual VolumeOracle address 
         uint slope = 0.03 * 1e18;
          uint fee = 0.0003 * 1e18;
          uint basePrice = 0.1 * 1e18;

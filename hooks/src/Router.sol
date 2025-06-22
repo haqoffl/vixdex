@@ -16,8 +16,6 @@ import {IV4Router} from "@uniswap/v4-periphery/src/interfaces/IV4Router.sol";
 import {IPermit2} from "@uniswap/permit2/src/interfaces/IPermit2.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-
-
 contract Router is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
@@ -38,26 +36,39 @@ contract Router is ReentrancyGuard {
         permit2 = IPermit2(_permit2);
     }
 
+    function _constructPoolKey(
+        address token0,
+        address token1,
+        uint24 fee,
+        int24 tickSpacing,
+        address hookContract
+    ) internal pure returns (PoolKey memory) {
+        require(token0 != address(0) && token1 != address(0), "Router: Token addresses cannot be zero");
+        require(token0 != token1, "Router: Tokens must be different");
+        
+        // Ensure currencies are properly sorted
+        if (token0 > token1) {
+            (token0, token1) = (token1, token0);
+        }
+        
+        return PoolKey({
+            currency0: Currency.wrap(token0),
+            currency1: Currency.wrap(token1),
+            fee: fee,
+            tickSpacing: tickSpacing,
+            hooks: IHooks(hookContract)
+        });
+    }
+
     function createPool(
-        address _token0,
-        address _token1,
-        uint24 lpFee,
+        address token0,
+        address token1,
+        uint24 fee,
         int24 tickSpacing,
         address hookContract,
         uint160 sqrtStartPriceX96
     ) public {
-        require(_token0 != address(0) && _token1 != address(0), "Router: Token addresses cannot be zero");
-        require(_token0 != _token1, "Router: Tokens must be different");
-        (address token0, address token1) = _token0 < _token1 ? (_token0, _token1) : (_token1, _token0);//sorting as per uniswap
-        Currency currency0 = Currency.wrap(token0);
-        Currency currency1 = Currency.wrap(token1);
-        PoolKey memory pool = PoolKey({
-            currency0: currency0,
-            currency1: currency1,
-            fee: lpFee,
-            tickSpacing: tickSpacing,
-            hooks: IHooks(hookContract)
-        });
+        PoolKey memory pool = _constructPoolKey(token0, token1, fee, tickSpacing, hookContract);
         positionManager.initializePool(pool, sqrtStartPriceX96);
     }
 
@@ -66,21 +77,26 @@ contract Router is ReentrancyGuard {
         uint160 amount,
         uint48 expiration
     ) external {
-        // Using forceApprove instead of deprecated safeApprove
         IERC20(token).forceApprove(address(permit2), type(uint256).max);
         permit2.approve(token, address(router), amount, expiration);
     }
 
     function ExactInputSwapSingle(
-        PoolKey calldata key,
+        address token0,
+        address token1,
+        uint24 fee,
+        int24 tickSpacing,
+        address hookContract,
         uint128 amountIn,
         uint128 minAmountOut,
         bool zeroForOne,
-        bytes memory hookData,
+        bytes calldata hookData,
         address recipient
     ) external nonReentrant returns (uint256 amountOut) {
-        address outputToken = zeroForOne
-            ? Currency.unwrap(key.currency1)
+        PoolKey memory key = _constructPoolKey(token0, token1, fee, tickSpacing, hookContract);
+
+        address outputToken = zeroForOne 
+            ? Currency.unwrap(key.currency1) 
             : Currency.unwrap(key.currency0);
 
         uint256 balanceBefore = IERC20(outputToken).balanceOf(address(this));
@@ -114,7 +130,8 @@ contract Router is ReentrancyGuard {
         );
 
         inputs[0] = abi.encode(actions, params);
-        IERC20(zeroForOne ? Currency.unwrap(key.currency0) : Currency.unwrap(key.currency1)).safeTransferFrom(msg.sender, address(this), amountIn);
+        IERC20(zeroForOne ? Currency.unwrap(key.currency0) : Currency.unwrap(key.currency1))
+            .safeTransferFrom(msg.sender, address(this), amountIn);
 
         router.execute(commands, inputs, block.timestamp + 60);
 
@@ -129,18 +146,24 @@ contract Router is ReentrancyGuard {
     }
 
     function ExactOutputSwapSingle(
-        PoolKey calldata key,
+        address token0,
+        address token1,
+        uint24 fee,
+        int24 tickSpacing,
+        address hookContract,
         uint128 amountOut,
         uint128 maxAmountIn,
         bool zeroForOne,
-        bytes memory hookData,
+        bytes calldata hookData,
         address recipient
     ) external nonReentrant returns (uint256 amountIn) {
-        address inputToken = zeroForOne
-            ? Currency.unwrap(key.currency0)
+        PoolKey memory key = _constructPoolKey(token0, token1, fee, tickSpacing, hookContract);
+
+        address inputToken = zeroForOne 
+            ? Currency.unwrap(key.currency0) 
             : Currency.unwrap(key.currency1);
-        address outputToken = zeroForOne
-            ? Currency.unwrap(key.currency1)
+        address outputToken = zeroForOne 
+            ? Currency.unwrap(key.currency1) 
             : Currency.unwrap(key.currency0);
 
         uint256 balanceBefore = IERC20(inputToken).balanceOf(address(this));
@@ -175,6 +198,7 @@ contract Router is ReentrancyGuard {
 
         inputs[0] = abi.encode(actions, params);
         IERC20(inputToken).safeTransferFrom(msg.sender, address(this), maxAmountIn);
+
         router.execute(commands, inputs, block.timestamp + 60);
 
         uint256 balanceAfter = IERC20(inputToken).balanceOf(address(this));
@@ -184,13 +208,14 @@ contract Router is ReentrancyGuard {
 
         uint256 balanceOutput = IERC20(outputToken).balanceOf(address(this));
         require(balanceOutput >= amountOut, "Insufficient output received");
-        uint256 balanceInput = IERC20(inputToken).balanceOf(address(this));
+
         if (balanceOutput > 0) {
             IERC20(outputToken).safeTransfer(recipient, balanceOutput);
         }
-        if(balanceInput > 0){
+
+        uint256 balanceInput = IERC20(inputToken).balanceOf(address(this));
+        if (balanceInput > 0) {
             IERC20(inputToken).safeTransfer(recipient, balanceInput);
         }
-        
     }
 }
