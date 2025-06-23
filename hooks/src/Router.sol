@@ -23,6 +23,9 @@ contract Router is ReentrancyGuard {
     UniversalRouter public immutable router;
     IPoolManager public immutable poolManager;
     IPermit2 public immutable permit2;
+    struct HookData{
+        address poolAdd;
+    }
 
     constructor(
         address _positionManager,
@@ -35,6 +38,8 @@ contract Router is ReentrancyGuard {
         poolManager = IPoolManager(_poolManager);
         permit2 = IPermit2(_permit2);
     }
+
+
 
     function _constructPoolKey(
         address token0,
@@ -77,7 +82,7 @@ contract Router is ReentrancyGuard {
         uint160 amount,
         uint48 expiration
     ) external {
-        IERC20(token).forceApprove(address(permit2), type(uint256).max);
+        IERC20(token).approve(address(permit2), type(uint256).max);
         permit2.approve(token, address(router), amount, expiration);
     }
 
@@ -90,9 +95,10 @@ contract Router is ReentrancyGuard {
         uint128 amountIn,
         uint128 minAmountOut,
         bool zeroForOne,
-        bytes calldata hookData,
+        address poolAdd,
         address recipient
     ) external nonReentrant returns (uint256 amountOut) {
+         bytes memory hookData =  abi.encode(HookData(poolAdd));
         PoolKey memory key = _constructPoolKey(token0, token1, fee, tickSpacing, hookContract);
 
         address outputToken = zeroForOne 
@@ -120,18 +126,12 @@ contract Router is ReentrancyGuard {
                 hookData: hookData
             })
         );
-        params[1] = abi.encode(
-            zeroForOne ? key.currency0 : key.currency1,
-            amountIn
-        );
-        params[2] = abi.encode(
-            zeroForOne ? key.currency1 : key.currency0,
-            minAmountOut
-        );
+        params[1] = abi.encode(key.currency0, amountIn);
+        params[2] = abi.encode(key.currency1,minAmountOut);
 
         inputs[0] = abi.encode(actions, params);
         IERC20(zeroForOne ? Currency.unwrap(key.currency0) : Currency.unwrap(key.currency1))
-            .safeTransferFrom(msg.sender, address(this), amountIn);
+            .transferFrom(msg.sender, address(this), amountIn);
 
         router.execute(commands, inputs, block.timestamp + 60);
 
@@ -141,7 +141,7 @@ contract Router is ReentrancyGuard {
         require(amountOut >= minAmountOut, "Insufficient output received");
 
         if (amountOut > 0) {
-            IERC20(outputToken).safeTransfer(recipient, amountOut);
+            IERC20(outputToken).transfer(recipient, amountOut);
         }
     }
 
@@ -154,9 +154,10 @@ contract Router is ReentrancyGuard {
         uint128 amountOut,
         uint128 maxAmountIn,
         bool zeroForOne,
-        bytes calldata hookData,
+       address poolAdd,
         address recipient
     ) external nonReentrant returns (uint256 amountIn) {
+         bytes memory hookData =  abi.encode(HookData(poolAdd));
         PoolKey memory key = _constructPoolKey(token0, token1, fee, tickSpacing, hookContract);
 
         address inputToken = zeroForOne 

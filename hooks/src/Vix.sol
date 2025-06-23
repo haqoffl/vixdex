@@ -296,13 +296,13 @@ function buyHighToken(PoolKey calldata key,VixTokenData storage vixTokenData,uin
     vixTokenData.reserve0 += cost;
    }  
     if(zeroIsBase){
-        key.currency0.take(poolManager, address(this), cost, true);
+        key.currency0.take(poolManager, address(this), cost/1e12, true);
         key.currency1.settle(poolManager, address(this), amountInOutPositive, true);
     }else{
-        key.currency1.take(poolManager, address(this), cost, true);
+        key.currency1.take(poolManager, address(this), cost/1e12, true);
         key.currency0.settle(poolManager, address(this), amountInOutPositive, true);
     }
-    return (-int128(uint128(amountInOutPositive)), int128(uint128(cost)));
+    return (-int128(uint128(amountInOutPositive)), int128(uint128(cost/1e12)));
 }
 
 function buyLowToken(PoolKey calldata key,VixTokenData storage vixTokenData,uint256 amountInOutPositive,bool zeroIsBase) private returns (int128, int128) {
@@ -320,13 +320,13 @@ function buyLowToken(PoolKey calldata key,VixTokenData storage vixTokenData,uint
     vixTokenData.reserve1 += cost;
     }
     if(zeroIsBase){
-        key.currency0.take(poolManager, address(this), cost, true);
+        key.currency0.take(poolManager, address(this), cost/1e12, true);
         key.currency1.settle(poolManager, address(this), amountInOutPositive, true);
     }else{
-        key.currency1.take(poolManager, address(this), cost, true);
+        key.currency1.take(poolManager, address(this), cost/1e12, true);
         key.currency0.settle(poolManager, address(this), amountInOutPositive, true);
     }
-    return (-int128(uint128(amountInOutPositive)), int128(uint128(cost)));
+    return (-int128(uint128(amountInOutPositive)), int128(uint128(cost/1e12)));
 }
 
 function sellHighToken(PoolKey calldata key,VixTokenData storage vixTokenData,uint256 amountInOutPositive,bool zeroIsBase) private returns (int128, int128) {
@@ -343,13 +343,13 @@ function sellHighToken(PoolKey calldata key,VixTokenData storage vixTokenData,ui
     vixTokenData.reserve0 -= baseToken_returns;
     }
     if(zeroIsBase){
-        key.currency0.settle(poolManager, address(this),baseToken_returns, true);
+        key.currency0.settle(poolManager, address(this),baseToken_returns/1e12, true);
         key.currency1.take(poolManager, address(this), amountInOutPositive, true);
     }else{
-        key.currency1.settle(poolManager, address(this),baseToken_returns, true);
+        key.currency1.settle(poolManager, address(this),baseToken_returns/1e12, true);
         key.currency0.take(poolManager, address(this), amountInOutPositive, true);
     }
-    return (int128(uint128(amountInOutPositive)), -int128(uint128(baseToken_returns)));
+    return (int128(uint128(amountInOutPositive)), -int128(uint128(baseToken_returns/1e12)));
 }
 
 function sellLowToken(PoolKey calldata key,VixTokenData storage vixTokenData,uint256 amountInOutPositive,bool zeroIsBase) private returns (int128, int128) {
@@ -366,13 +366,13 @@ function sellLowToken(PoolKey calldata key,VixTokenData storage vixTokenData,uin
             vixTokenData.reserve1 -= baseToken_returns;
     }
     if(zeroIsBase){
-        key.currency0.settle(poolManager, address(this),baseToken_returns, true);
+        key.currency0.settle(poolManager, address(this),baseToken_returns/1e12, true);
         key.currency1.take(poolManager, address(this), amountInOutPositive, true);
     }else{
-        key.currency1.settle(poolManager, address(this),baseToken_returns, true);
+        key.currency1.settle(poolManager, address(this),baseToken_returns/1e12, true);
         key.currency0.take(poolManager, address(this), amountInOutPositive, true);
     }
-    return (int128(uint128(amountInOutPositive)), -int128(uint128(baseToken_returns)));
+    return (int128(uint128(amountInOutPositive)), -int128(uint128(baseToken_returns/1e12)));
 }
 
 function withdrawEarningsForOwner() public {
@@ -385,7 +385,7 @@ function withdrawEarningsForOwner() public {
         poolManager.unlock(
         abi.encode(
             CallbackData(
-                amountEarned,
+                amountEarned/1e12,
                 base,
                 base,
                 msg.sender,
@@ -406,7 +406,7 @@ function withdrawEarningsForInitiator(address _poolAdd) public {
         poolManager.unlock(
         abi.encode(
             CallbackData(
-                amountEarned,
+                amountEarned/1e12,
                 base,
                 base,
                 msg.sender,
