@@ -16,13 +16,14 @@ contract RouterForkTest is Test {
     
     Router public router;
 
-    address constant POSITION_MANAGER = 0xbD216513d74C8cf14cf4747E6AaA6420FF64ee9e;
-    address constant UNIVERSAL_ROUTER = 0x66a9893cC07D91D95644AEDD05D03f95e1dBA8Af;
-    address constant POOL_MANAGER = 0x000000000004444c5dc75cB358380D2e3dE08A90;
+    address constant POSITION_MANAGER = 0x429ba70129df741B2Ca2a85BC3A2a3328e5c09b4;
+    address constant UNIVERSAL_ROUTER = 0x3A9D48AB9751398BbFa63ad67599Bb04e4BdF98b;
+    address constant POOL_MANAGER = 0xE03A1074c86CFeDd5C142C4F04F1a1536e203543;
     address constant PERMIT2 = 0x000000000022D473030F116dDEE9F6B43aC78BA3;
 
-    address constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-    address constant HIGH = 0xD8e3Db1a620a8053d6F06133C5962C402D37D43C;
+    address constant USDC = 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238;
+    address constant HIGH = 0x2c39e1831464B8acd3b41E941b59965538AD4DAc;
+    
 
     // A known whale holding USDC on mainnet
     address constant whale = 0x55FE002aefF02F77364de339a1292923A15844B8;
@@ -38,6 +39,7 @@ contract RouterForkTest is Test {
 
         // IMPORTANT: Approve the router directly to spend whale's USDC
         IERC20(USDC).approve(address(router), type(uint256).max);
+
         
         // Also setup Permit2 for the router contract
         router.approveTokenWithPermit2(USDC, 10_000e6, uint48(block.timestamp + 3600));
@@ -52,26 +54,48 @@ contract RouterForkTest is Test {
         //     currency1: Currency.wrap(HIGH),
         //     fee: 3000,
         //     tickSpacing: 60,
-        //     hooks: IHooks(address(0xeADc96098D7a1D5Ba3d6A2F93fB248ED2D1b08C8))
+        //     hooks: IHooks(address(0xA84e223e414176D612685a1277d0BAF309D388c8))
         // });
 
         // uint128 amountIn = 10_000e6;
         // uint128 minAmountOut = 9_900e6;
         // bool zeroForOne = true;
-
+	
         uint256 amountOut = router.ExactOutputSwapSingle(
             USDC,
             HIGH,
             3000,
             60,
-            0xeADc96098D7a1D5Ba3d6A2F93fB248ED2D1b08C8,
-             4 ether,
-            type(uint128).max,
+            0x18081f554ce7503e0BE894B5D7dfE9AA83fBC8C8,
+            4 ether,
+            2 * 1e6,
             true,
-            0x99ac8cA7087fA4A2A1FB6357269965A2014ABc35, 
+            0x74CB8871FE62ADA6EC9965f9dd7C1D0826de26cc, 
             whale);
+            
+        console.log("balance of high token: ",IERC20(HIGH).balanceOf(whale));
+            
+	    console.log("balance of USDC token: ",IERC20(USDC).balanceOf(whale));
+        console.log("Amount out:", amountOut);
+        // IERC20(HIGH).approve(address(router), type(uint256).max);
 
-            console.log("Amount out:", amountOut);
+         
+        // Also setup Permit2 for the router contract
+        // router.approveTokenWithPermit2(HIGH,3 ether, uint48(block.timestamp + 3600));
+        // uint256 amountIn = router.ExactInputSwapSingle(
+        // 	USDC,
+        // 	HIGH,
+        // 	3000,
+        // 	60,
+        // 	0x18081f554ce7503e0BE894B5D7dfE9AA83fBC8C8,
+        // 	3 ether,
+        // 	0,
+        // 	false,
+        // 	0x74CB8871FE62ADA6EC9965f9dd7C1D0826de26cc,
+        // 	whale
+        // );
+        // console.log("balance of USDC token: ",IERC20(USDC).balanceOf(whale));
+        // console.log("Amount out:", amountIn);
 
         // emit log_named_uint("USDT received", amountOut);
         // assertGt(amountOut, minAmountOut, "Should receive more than minimum USDT");

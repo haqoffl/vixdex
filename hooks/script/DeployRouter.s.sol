@@ -7,13 +7,15 @@ import "forge-std/console.sol";
 contract DeployRouter is Script {
     function run() public {
         vm.startBroadcast();
-        address positionManager = 0xbD216513d74C8cf14cf4747E6AaA6420FF64ee9e; // Replace with actual PositionManager address
-        address payable router = payable(0x66a9893cC07D91D95644AEDD05D03f95e1dBA8Af); // Replace with actual Router address
-        address poolManager = 0x000000000004444c5dc75cB358380D2e3dE08A90; // Replace with actual PoolManager address
+        address positionManager = 0x429ba70129df741B2Ca2a85BC3A2a3328e5c09b4; // Replace with actual PositionManager address
+        address payable router = payable(0x3A9D48AB9751398BbFa63ad67599Bb04e4BdF98b); // Replace with actual Router address
+        address poolManager = 0xE03A1074c86CFeDd5C142C4F04F1a1536e203543; // Replace with actual PoolManager address
         address permit2 = 0x000000000022D473030F116dDEE9F6B43aC78BA3; // Replace with actual Permit2 address
 
         Router newRouter = new Router(positionManager, router, poolManager, permit2);
         console.log("Router deployed at:", address(newRouter));
         vm.stopBroadcast();
     }
-}
+} 
+
+

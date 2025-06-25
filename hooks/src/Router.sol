@@ -17,7 +17,7 @@ import {IPermit2} from "@uniswap/permit2/src/interfaces/IPermit2.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract Router is ReentrancyGuard {
-    using SafeERC20 for IERC20;
+
 
     IPositionManager public immutable positionManager;
     UniversalRouter public immutable router;
@@ -95,7 +95,7 @@ contract Router is ReentrancyGuard {
         uint128 amountIn,
         uint128 minAmountOut,
         bool zeroForOne,
-        address poolAdd,
+         address poolAdd,
         address recipient
     ) external nonReentrant returns (uint256 amountOut) {
          bytes memory hookData =  abi.encode(HookData(poolAdd));
@@ -126,8 +126,14 @@ contract Router is ReentrancyGuard {
                 hookData: hookData
             })
         );
-        params[1] = abi.encode(key.currency0, amountIn);
-        params[2] = abi.encode(key.currency1,minAmountOut);
+        params[1] = abi.encode(
+            zeroForOne ? key.currency0 : key.currency1,
+            amountIn
+        );
+        params[2] = abi.encode(
+            zeroForOne ? key.currency1 : key.currency0,
+            minAmountOut
+        );
 
         inputs[0] = abi.encode(actions, params);
         IERC20(zeroForOne ? Currency.unwrap(key.currency0) : Currency.unwrap(key.currency1))
@@ -198,7 +204,7 @@ contract Router is ReentrancyGuard {
         );
 
         inputs[0] = abi.encode(actions, params);
-        IERC20(inputToken).safeTransferFrom(msg.sender, address(this), maxAmountIn);
+        IERC20(inputToken).transferFrom(msg.sender, address(this), maxAmountIn);
 
         router.execute(commands, inputs, block.timestamp + 60);
 
@@ -211,12 +217,12 @@ contract Router is ReentrancyGuard {
         require(balanceOutput >= amountOut, "Insufficient output received");
 
         if (balanceOutput > 0) {
-            IERC20(outputToken).safeTransfer(recipient, balanceOutput);
+            IERC20(outputToken).transfer(recipient, balanceOutput);
         }
 
         uint256 balanceInput = IERC20(inputToken).balanceOf(address(this));
         if (balanceInput > 0) {
-            IERC20(inputToken).safeTransfer(recipient, balanceInput);
+            IERC20(inputToken).transfer(recipient, balanceInput);
         }
     }
 }

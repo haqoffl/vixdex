@@ -25,14 +25,14 @@ contract VixTest is Test,Deployers {
 
     Vix hook;
     address public baseToken;
-    address public poolAdd = 0x99ac8cA7087fA4A2A1FB6357269965A2014ABc35; // pool address of uniswap V3 pair (WBTC/ETH)
+    address public poolAdd = 0x74CB8871FE62ADA6EC9965f9dd7C1D0826de26cc; // pool address of uniswap V3 pair (WBTC/ETH)
     address[2] ivTokenAdd;
-    address volumeOracle = 0x38fb9c37863562c765CBbeA36C75025061EacbEF; // volume oracle from vixdex
+    address volumeOracle = 0xDf2D6dc6598655685FF9f6f272324B8E749A3546; // volume oracle from vixdex
 
     struct HookData{
         address poolAdd;
     }
-    address _bondingCurve = 0xC3C28cE5cE29176601d6f3B9CeAAD9208b13ccf4; // Bonding curve address 
+    address _bondingCurve = 0xCa7FF6ad2e29cc407E399946c0E4e62cca18B730; // Bonding curve address 
     uint slope = 0.003 * 1e18; //slope of bonding curve
     uint fee = 0.003 * 1e18; // fee for the bonding curve
     uint basePrice = 0.1 * 1e18; // base price of the bonding curve

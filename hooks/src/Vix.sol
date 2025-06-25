@@ -12,7 +12,6 @@ import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
 import {StateLibrary} from "v4-core/src/libraries/StateLibrary.sol";
 import {MockERC20} from "solmate/src/test/utils/mocks/MockERC20.sol";
-import {Volatility} from "./lib/Volatility.sol";
 import {VolatileERC20} from "./VolatileERC20.sol";
 import {BondingCurve} from "./lib/BondingCurve.sol";
 import {ImpliedVolatility} from "./lib/ImpliedVolatility.sol";
@@ -61,7 +60,6 @@ contract Vix is BaseHook{
     using CurrencyLibrary for Currency;
     using CurrencySettler for Currency;
     using StateLibrary for IPoolManager;
-    using Volatility for int;
     using BondingCurve for uint;
     using ImpliedVolatility for uint160;
     using LiquidityConversion for uint128;

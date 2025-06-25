@@ -12,8 +12,8 @@ import "forge-std/console.sol";
 contract HookMiningSample is Script {
     // Address of PoolManager deployed on Sepolia
     PoolManager manager =
-        PoolManager(0x000000000004444c5dc75cB358380D2e3dE08A90);
-    address baseToken = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // change to your base token address
+        PoolManager(0xE03A1074c86CFeDd5C142C4F04F1a1536e203543);
+    address baseToken = 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238; // change to your base token address
 
     function setUp() public {
 		// Set up the hook flags you wish to enable
@@ -25,8 +25,8 @@ contract HookMiningSample is Script {
 
 		// Find an address + salt using HookMiner that meets our flags criteria
         address CREATE2_DEPLOYER = 0x4e59b44847b379578588920cA78FbF26c0B4956C; //create2 deployer address in Sepolia
-        address _bondingCurve = 0xfC47d03bd4C8a7E62A62f29000ceBa4D84142343; //replace with actual BondingCurve address
-        address volumeOracle = 0x7E287bb62F87916c190b45BA0921F862Fb4b9Aa5; // Replace with actual VolumeOracle address 
+        address _bondingCurve = 0xCa7FF6ad2e29cc407E399946c0E4e62cca18B730; //replace with actual BondingCurve address
+        address volumeOracle = 0xDf2D6dc6598655685FF9f6f272324B8E749A3546; // Replace with actual VolumeOracle address 
         uint slope = 0.03 * 1e18;
          uint fee = 0.0003 * 1e18;
          uint basePrice = 0.1 * 1e18;
@@ -49,3 +49,4 @@ contract HookMiningSample is Script {
     }
     
 }
+ 

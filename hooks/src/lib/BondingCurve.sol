@@ -3,12 +3,12 @@ pragma solidity ^0.8.13;
 import "forge-std/console.sol";  // Foundry's console library
 
     /**
-     * @title Bonding Curve Library
+     * @title Bonding Curve Library 
      * @dev This library provides the necessary functions to operate a bonding curve.
      * @dev It is used to calculate the cost of purchasing/selling tokens
      * @dev and to calculate the number of tokens that can be purchased/sold
      * @dev for a given cost.
-     * @notice This library is used by the `vix` contract.
+     * @notice This library is is not used by vix contracts but it take as an reference to create bonding curve in huff
      */
 
 library BondingCurve{
