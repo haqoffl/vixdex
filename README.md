@@ -179,7 +179,7 @@ Happy coding :)
 
 You can find the official Vixdex whitepaper in the following Google Drive folder:
 
-🔗 [View Whitepaper Folder](https://drive.google.com/file/d/1HRLXA0EMePYPyHbVvtZ-cdS1K0VnBSKP/view?usp=sharing)
+🔗 [View Whitepaper Folder](https://drive.google.com/file/d/1BPGjieVkcxKgy1KkjHsqKZXsYwPn6Gzz/view?usp=sharing)
 
 
 ## 📬 Contact
