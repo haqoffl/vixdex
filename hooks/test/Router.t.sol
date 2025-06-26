@@ -22,7 +22,7 @@ contract RouterForkTest is Test {
     address constant PERMIT2 = 0x000000000022D473030F116dDEE9F6B43aC78BA3;
 
     address constant USDC = 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238;
-    address constant HIGH = 0x2c39e1831464B8acd3b41E941b59965538AD4DAc;
+    address constant HIGH = 0x126586d5cB2e55fe62bc6c6fEbe0ceB09CFA8012;
     
 
     // A known whale holding USDC on mainnet
@@ -60,24 +60,24 @@ contract RouterForkTest is Test {
         // uint128 amountIn = 10_000e6;
         // uint128 minAmountOut = 9_900e6;
         // bool zeroForOne = true;
-	
-        uint256 amountOut = router.ExactOutputSwapSingle(
-            USDC,
-            HIGH,
-            3000,
-            60,
-            0x18081f554ce7503e0BE894B5D7dfE9AA83fBC8C8,
-            4 ether,
-            2 * 1e6,
-            true,
-            0x74CB8871FE62ADA6EC9965f9dd7C1D0826de26cc, 
-            whale);
+	    IERC20(HIGH).approve(address(router), type(uint256).max);
+
+        // uint256 amountOut = router.ExactOutputSwapSingle(
+        //     USDC,
+        //     HIGH,
+        //     3000,
+        //     60,
+        //     0x18081f554ce7503e0BE894B5D7dfE9AA83fBC8C8,
+        //     4 ether,
+        //     2 * 1e6,
+        //     true,
+        //     0x74CB8871FE62ADA6EC9965f9dd7C1D0826de26cc, 
+        //     whale);
             
-        console.log("balance of high token: ",IERC20(HIGH).balanceOf(whale));
+        // console.log("balance of high token: ",IERC20(HIGH).balanceOf(whale));
             
-	    console.log("balance of USDC token: ",IERC20(USDC).balanceOf(whale));
-        console.log("Amount out:", amountOut);
-        // IERC20(HIGH).approve(address(router), type(uint256).max);
+	    // console.log("balance of USDC token: ",IERC20(USDC).balanceOf(whale));
+        // console.log("Amount out:", amountOut);
 
          
         // Also setup Permit2 for the router contract

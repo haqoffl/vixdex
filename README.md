@@ -163,6 +163,25 @@ Update your smart contract variables.
 
 Happy coding :)
 
+## 🛠️ Deployments
+
+### 🌐 Sepolia Testnet
+
+| Contract           | Address                                                                 |
+|--------------------|--------------------------------------------------------------------------|
+| Swap Router        | `0x5822A01d9465ce997e652ff592d0dB9604ef3dc1`                             |
+| Huff Bonding Curve | `0xCa7FF6ad2e29cc407E399946c0E4e62cca18B730`                             |
+| Vixdex Hook        | `0xa8378271B8b7394A8D2AABf47fEE58a4c1FdC8c8`                             |
+| Volume Oracle      | *(See contract address in `vixdex-volume-oracle-node` repo)*            |
+
+
+## 📄 Whitepaper
+
+You can find the official Vixdex whitepaper in the following Google Drive folder:
+
+🔗 [View Whitepaper Folder](https://drive.google.com/file/d/1HRLXA0EMePYPyHbVvtZ-cdS1K0VnBSKP/view?usp=sharing)
+
+
 ## 📬 Contact
 
 If you have any questions, feedback, or are interested in contributing, feel free to reach out:

@@ -236,7 +236,7 @@ function _afterSwap(address, PoolKey calldata, IPoolManager.SwapParams calldata,
     address _poolAddress = vixTokens[_poolAdd].poolAddress;
     uint160 volume = uint160(volumeOracle.getVolumeData(_poolAddress).volume24HrInQuoteToken);
     uint160 iv = calculateIv(_poolAddress,volume,hookData.poolAdd);
-    if(vixTokens[_poolAdd].reserve0 >0 && vixTokens[_poolAdd].reserve1 >0){
+    if(vixTokens[_poolAdd].reserve0 > 0 && vixTokens[_poolAdd].reserve1 > 0){
         // when we deployed the vix, we take the iv, in after swap, i calc iv again and compare with initial IV
         // initial IV > current IV, reserve swap from high token to low token,
         // and contract holding also burn for high token and mint for low toke.
@@ -429,7 +429,7 @@ function withdrawEarningsForInitiator(address _poolAdd) public {
  */
 
 function deploy2Currency(address deriveToken, string[2] memory _tokenName, string[2] memory _tokenSymbol,address _poolAddress ) public returns(address[2] memory){
-    require((isPairInitiated[deriveToken] == false || pairEndingTime[deriveToken] < block.timestamp),"Pair still active");
+    require(isPairInitiated[deriveToken] == false ,"Pair still active");
     isPairInitiated[deriveToken] = true;
     pairInitiatedTime[deriveToken] = block.timestamp;
     address[2] memory vixTokenAddresses;
@@ -440,6 +440,7 @@ function deploy2Currency(address deriveToken, string[2] memory _tokenName, strin
     }
 
     uint160 volume = uint160(volumeOracle.getVolumeData(_poolAddress).volume24HrInQuoteToken);
+    console.log("volume: ",volume);
     uint160 initialIv = calculateIv(_poolAddress,volume,deriveToken);
     vixTokens[deriveToken] = VixTokenData(vixTokenAddresses[0],vixTokenAddresses[1],0,0,0,0,0,0,_poolAddress,initialIv,0,msg.sender,0);
     liquidateVixTokenToPm(IV_TOKEN_SUPPLY, vixTokenAddresses[0], vixTokenAddresses[1]);
@@ -524,9 +525,9 @@ function mintVixToken(address to,address _token,uint _amount) internal returns (
 
 
 
-function getVixData(address poolAdd)public view returns (address vixHighToken,address _vixLowToken,uint _circulation0,uint _circulation1,uint _contractHoldings0,uint _contractHoldings1,uint _reserve0,uint _reserve1,address _poolAddress){
+function getVixData(address poolAdd)public view returns (address vixHighToken,address _vixLowToken,uint _circulation0,uint _circulation1,uint _contractHoldings0,uint _contractHoldings1,uint _reserve0,uint _reserve1,uint160 _averageIV,address _poolAddress){
      VixTokenData memory vixTokenData = vixTokens[poolAdd];
-     return (vixTokenData.vixHighToken,vixTokenData.vixLowToken,vixTokenData.circulation0,vixTokenData.circulation1,vixTokenData.contractHoldings0,vixTokenData.contractHoldings1,vixTokenData.reserve0,vixTokenData.reserve1,vixTokenData.poolAddress);
+     return (vixTokenData.vixHighToken,vixTokenData.vixLowToken,vixTokenData.circulation0,vixTokenData.circulation1,vixTokenData.contractHoldings0,vixTokenData.contractHoldings1,vixTokenData.reserve0,vixTokenData.reserve1,vixTokenData.averageIV,vixTokenData.poolAddress);
 }
 
 /**
@@ -579,7 +580,7 @@ function calculateIv(address _poolAddress,uint160 volume,address poolAdd) public
 
 
 function swapReserve(uint averageIV, uint currentIv, uint reserve0, uint reserve1,uint circulation0,uint circulation1,address poolAdd) public  returns(uint,uint){
-    if(averageIV > currentIv && reserve0 > 1 ether){
+    if(averageIV > currentIv && reserve0 > 0){
         /* 
         1. swap certain amount of reserve0 (high token Reserve) to reserve1 (low token Reserve) 
         2. burn contract holding 0 (high token) and mint contract holding 1 (low token)
@@ -587,6 +588,8 @@ function swapReserve(uint averageIV, uint currentIv, uint reserve0, uint reserve
         4. price of low token will increase due to mint of contract holding 1
         4. for smooth sell and buy, we swapped reserve
         */
+
+        console.log("reserve shift trigger");
         uint reserveShift = (RESERVE_SHIFT_SLOPE * reserve0) / 1e18;
         require(reserveShift > 0,"reserve shift should be greater than 0");
         uint tokenBurn = (reserveShift * circulation0) / (reserve0+1);
@@ -600,7 +603,7 @@ function swapReserve(uint averageIV, uint currentIv, uint reserve0, uint reserve
         return (reserveShift,tokenBurn);
 
 
-    }else if(averageIV < currentIv && reserve1 >  1 ether){
+    }else if(averageIV < currentIv && reserve1 > 0){
         /* 
         1. swap certain amount of reserve1 (low token Reserve) to reserve0 (high token Reserve) 
         2. burn contract holding 1 (low token) and mint contract holding 0 (high token)

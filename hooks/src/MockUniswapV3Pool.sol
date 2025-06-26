@@ -17,6 +17,7 @@ interface IMinimalUniswapV3Pool {
     function token0() external view returns (address);
     function token1() external view returns (address);
     function fee() external view returns (uint24);
+    function setTickAndLiq(uint128 liquidity_,int24 tick_) external;
 }
 
 contract MockUniswapV3Pool is IMinimalUniswapV3Pool {
@@ -78,6 +79,7 @@ contract MockUniswapV3Pool is IMinimalUniswapV3Pool {
     function fee() external view override returns (uint24) {
         return _fee;
     }
+    
 
     // Add any other mocked methods as needed.
 
