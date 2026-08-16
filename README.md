@@ -10,6 +10,8 @@
 [![Foundry](https://img.shields.io/badge/Foundry-forge%20%2B%20anvil-000000?style=for-the-badge)](https://book.getfoundry.sh)
 [![Huff](https://img.shields.io/badge/Huff-hand%20written%20EVM-6E4AFF?style=for-the-badge)](https://huff.sh)
 
+<img src="docs/hook.svg" alt="How the VixDex hook intercepts a swap and substitutes an implied-volatility pricing curve for the pool's own" width="900">
+
 </div>
 
 ---
