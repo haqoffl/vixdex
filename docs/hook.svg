@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560" role="img" aria-label="How the VixDex Uniswap v4 hook intercepts a swap and substitutes an implied-volatility pricing curve for the pool's own.">
+  <defs>
+    <marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3BE08A"/></marker>
+    <marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#E0533B"/></marker>
+    <marker id="am" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#6F7D77"/></marker>
+  </defs>
+
+  <rect width="960" height="560" fill="#07090A"/>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+
+    <text x="32" y="42" fill="#E8EDEA" font-size="17" font-weight="600">VixDex — a v4 hook that prices volatility, not direction</text>
+    <text x="32" y="64" fill="#6F7D77" font-size="12">The pool never quotes the trade. The hook returns its own delta and the AMM honours it.</text>
+
+    <!-- trader -->
+    <rect x="32" y="104" width="150" height="58" fill="#121A17" stroke="#1E2A25"/>
+    <text x="47" y="130" fill="#E8EDEA" font-size="12.5">Trader</text>
+    <text x="47" y="149" fill="#6F7D77" font-size="11">buys HIGH-IV or LOW-IV</text>
+
+    <!-- pool manager -->
+    <rect x="256" y="104" width="184" height="58" fill="#121A17" stroke="#1E2A25"/>
+    <text x="271" y="130" fill="#E8EDEA" font-size="12.5">Uniswap v4 PoolManager</text>
+    <text x="271" y="149" fill="#6F7D77" font-size="11">receives the swap</text>
+
+    <!-- hook box -->
+    <rect x="256" y="212" width="424" height="232" fill="#0E1412" stroke="#1F7A4C"/>
+    <text x="272" y="238" fill="#3BE08A" font-size="12.5" font-weight="600">VixDex hook (no-op)</text>
+    <text x="272" y="257" fill="#6F7D77" font-size="10.5">four overridden permissions</text>
+
+    <rect x="272" y="272" width="392" height="36" fill="#07090A" stroke="#1E2A25"/>
+    <text x="286" y="288" fill="#E0533B" font-size="11.5">beforeAddLiquidity</text>
+    <text x="286" y="302" fill="#6F7D77" font-size="10.5">rejects LPs — the contract issues and prices the tokens itself</text>
+
+    <rect x="272" y="316" width="392" height="36" fill="#07090A" stroke="#1E2A25"/>
+    <text x="286" y="332" fill="#3BE08A" font-size="11.5">beforeSwap</text>
+    <text x="286" y="346" fill="#6F7D77" font-size="10.5">intercepts before the pool can quote</text>
+
+    <rect x="272" y="360" width="392" height="40" fill="#07090A" stroke="#1F7A4C" stroke-width="1.5"/>
+    <text x="286" y="376" fill="#3BE08A" font-size="11.5" font-weight="600">beforeSwapReturnDelta</text>
+    <text x="286" y="391" fill="#9AA8A2" font-size="10.5">returns a custom delta — this is what replaces the AMM curve</text>
+
+    <rect x="272" y="408" width="392" height="24" fill="#07090A" stroke="#1E2A25"/>
+    <text x="286" y="424" fill="#3BE08A" font-size="11.5">afterSwap<tspan fill="#6F7D77" font-size="10.5">   settles the position change</tspan></text>
+
+    <!-- IV source -->
+    <rect x="736" y="272" width="192" height="80" fill="#121A17" stroke="#1E2A25"/>
+    <text x="751" y="296" fill="#E8EDEA" font-size="12.5">Uniswap v3 pool</text>
+    <text x="751" y="315" fill="#6F7D77" font-size="10.5">state read on-chain,</text>
+    <text x="751" y="330" fill="#6F7D77" font-size="10.5">implied volatility derived</text>
+    <text x="751" y="345" fill="#6F7D77" font-size="10.5">here — no off-chain oracle</text>
+
+    <!-- token pair -->
+    <rect x="736" y="104" width="192" height="120" fill="#0E1412" stroke="#1F7A4C"/>
+    <text x="751" y="128" fill="#3BE08A" font-size="12.5" font-weight="600">Inverse pair</text>
+    <text x="751" y="152" fill="#E8EDEA" font-size="11.5">HIGH-IV</text>
+    <text x="751" y="167" fill="#6F7D77" font-size="10.5">gains as volatility rises</text>
+    <text x="751" y="191" fill="#E8EDEA" font-size="11.5">LOW-IV</text>
+    <text x="751" y="206" fill="#6F7D77" font-size="10.5">gains as volatility falls</text>
+
+    <!-- cycle -->
+    <rect x="32" y="212" width="184" height="120" fill="#121A17" stroke="#1E2A25"/>
+    <text x="47" y="236" fill="#E8EDEA" font-size="12.5">Cycle</text>
+    <text x="47" y="260" fill="#6F7D77" font-size="10.5">24 hours or 7 days</text>
+    <text x="47" y="282" fill="#6F7D77" font-size="10.5">positions expire</text>
+    <text x="47" y="300" fill="#6F7D77" font-size="10.5">market resets</text>
+    <text x="47" y="318" fill="#6F7D77" font-size="10.5">fresh pair minted</text>
+
+    <!-- price note -->
+    <rect x="32" y="360" width="184" height="84" fill="#121A17" stroke="#1E2A25"/>
+    <text x="47" y="384" fill="#E8EDEA" font-size="12.5">Price</text>
+    <text x="47" y="406" fill="#6F7D77" font-size="10.5">driven by IV</text>
+    <text x="47" y="424" fill="#6F7D77" font-size="10.5">supply and demand</text>
+    <text x="47" y="438" fill="#6F7D77" font-size="10.5">adjust only at the margin</text>
+
+    <!-- arrows -->
+    <path d="M182,133 L252,133" stroke="#3BE08A" stroke-width="1.4" fill="none" marker-end="url(#a)"/>
+    <path d="M348,162 L348,208" stroke="#3BE08A" stroke-width="1.4" fill="none" marker-end="url(#a)"/>
+    <path d="M664,380 L732,330" stroke="#6F7D77" stroke-width="1.2" fill="none" marker-end="url(#am)" stroke-dasharray="4 3"/>
+    <path d="M664,290 L732,290" stroke="#E0533B" stroke-width="1.2" fill="none" marker-end="url(#ar)" stroke-dasharray="4 3"/>
+    <path d="M680,420 C740,420 800,260 832,228" stroke="#3BE08A" stroke-width="1.4" fill="none" marker-end="url(#a)"/>
+    <path d="M216,272 L252,272" stroke="#6F7D77" stroke-width="1.2" fill="none" marker-end="url(#am)"/>
+    <path d="M216,400 L252,392" stroke="#6F7D77" stroke-width="1.2" fill="none" marker-end="url(#am)"/>
+
+    <text x="676" y="272" fill="#6F7D77" font-size="10">no LPs</text>
+    <text x="686" y="358" fill="#6F7D77" font-size="10">reads IV</text>
+
+    <text x="32" y="492" fill="#6F7D77" font-size="10.5">Without beforeSwapReturnDelta the pool prices the trade and none of this is possible.</text>
+    <text x="32" y="510" fill="#6F7D77" font-size="10.5">That single v4 permission is the reason the protocol could not have been built on v3.</text>
+    <text x="32" y="534" fill="#1F7A4C" font-size="10.5">Prize winner, Atrium Academy UHI-4</text>
+  </g>
+</svg>
