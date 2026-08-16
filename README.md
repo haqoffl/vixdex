@@ -1,68 +1,88 @@
-# Vixdex
+<div align="center">
 
-VixDex - Decentralized Volatility Trading Protocol
+# VixDex
 
-### uniswap prize winner hook in atrium academy UHI-4
+**Trade volatility itself, on-chain, with no liquidity providers.**
 
-## About this Project
-VixDex is a decentralized volatility trading protocol. It is a Uniswap V4 hook that introduces a custom pricing model for trading directly on volatility on-chain. VixDex allows traders to take positions on whether an asset’s volatility will increase or decrease, similar to VIX options trading but in a fully decentralized and automated manner.
+[![Uniswap v4](https://img.shields.io/badge/Uniswap-v4%20hook-FF007A?style=for-the-badge&logo=uniswap&logoColor=white)](https://docs.uniswap.org/contracts/v4/overview)
+[![Prize winner](https://img.shields.io/badge/prize%20winner-Atrium%20Academy%20UHI--4-10b981?style=for-the-badge)](https://atrium.academy)
+[![Solidity](https://img.shields.io/badge/Solidity-363636?style=for-the-badge&logo=solidity&logoColor=white)](https://soliditylang.org)
+[![Foundry](https://img.shields.io/badge/Foundry-forge%20%2B%20anvil-000000?style=for-the-badge)](https://book.getfoundry.sh)
+[![Huff](https://img.shields.io/badge/Huff-hand%20written%20EVM-6E4AFF?style=for-the-badge)](https://huff.sh)
 
+</div>
 
-## How it Works
-Traders can buy:
+---
 
-HIGH-IV Tokens → Value increases when IV is high.
+## What this is
 
-LOW-IV Tokens → Value increases when IV is low.
+A Uniswap v4 hook that turns implied volatility into something you can hold a position in.
 
-Positions expire in 24H or 7D, and at the end of each cycle, new tokens are minted.
+Traditional finance has VIX options for this. On-chain you could bet on price direction,
+but not cleanly on how violently price would move. VixDex prices two opposing tokens
+against an asset's implied volatility, so a trader can take a side on turbulence itself
+rather than on where the market ends up.
 
-Price is mostly influenced by IV, with minor adjustments from supply and demand.
+**Winner of the Uniswap hook prize at Atrium Academy UHI-4.**
 
-HIGH-IV and LOW-IV tokens are inversely correlated—when one increases, the other decreases.
+## How it works
 
+Two tokens per market, inversely correlated by construction:
 
-## 🛠️ Key Features
+| Token | Gains when |
+|---|---|
+| `HIGH-IV` | Implied volatility rises |
+| `LOW-IV` | Implied volatility falls |
 
-✅ No Liquidity Providers (LPs) Needed – The contract itself manages token issuance and pricing.
+Price is driven primarily by implied volatility, with supply and demand applying only a
+minor adjustment. Positions run on a fixed cycle of 24 hours or 7 days. At the end of each
+cycle positions expire, the market resets, and a fresh pair of IV tokens is minted.
 
-✅ Uniswap V3 Integration – The contract retrieves data from Uniswap V3, performs IV-related calculations, and executes trades fully on-chain.
+**No liquidity providers.** The contract manages issuance and pricing itself, rather than
+depending on someone showing up to quote a two-sided market in a product most people have
+never traded. That removes the bootstrap problem that kills most exotic on-chain
+derivatives before they get going.
 
-✅ Customizable Pricing Curve – The mechanism determining token prices may evolve to optimize efficiency.
+Implied volatility is derived from Uniswap v3 pool data, with the calculation performed
+on-chain rather than fed in by an off-chain oracle.
 
-✅ Automated Market Reset – Every 24H/7D, positions expire, and new IV tokens are issued.
+## The hook
 
-✅ Fully On-Chain & Decentralized – Built on Ethereum & Uniswap V4 hooks.
+Deployed as a **no-op hook** against the Uniswap v4 pool manager, overriding four
+permissions:
 
-## ⚙️ Design
-
-   The Uniswap V4 hook is deployed as a No-Op hook that overrides specific permissions on the Uniswap V4 pool manager. The following hooks are overridden:
-
-   `beforeAddLiquidity`
-
-   `beforeSwap`
-
-   `afterSwap`
-
-   `beforeSwapReturnDelta`
-
-
-# Vixdex Setup Guide
-
-## Installation
-
-### Step 1: Clone This Repository
-
-
-`git clone https://github.com/vixdex/vixdex.git`
-`cd /hooks`
-
-### Step 2: Install Required Dependencies
-
-#### Install Uniswap libraries:
-
-````
 ```
+beforeAddLiquidity      liquidity provision is handled by the contract, not by LPs
+beforeSwap              intercepts the swap before the pool prices it
+afterSwap               settles the position change
+beforeSwapReturnDelta   returns a custom delta, which is what allows the
+                        IV-driven pricing curve to replace the pool's own
+```
+
+`beforeSwapReturnDelta` is the mechanism that makes the whole thing possible. It is what
+lets a v4 hook substitute its own pricing model for the AMM's, and it is why this design
+could not have been built on v3.
+
+## Stack
+
+| | |
+|---|---|
+| Protocol | Uniswap v4 hooks, reading Uniswap v3 pool state |
+| Contracts | Solidity, with Huff for hand-written EVM where it matters |
+| Toolchain | Foundry (`forge`, `anvil`) |
+| Libraries | OpenZeppelin, v4-core, v4-periphery, v3-core, v3-periphery, permit2, universal-router |
+| Testing | Anvil fork of Sepolia and mainnet |
+
+## Setup
+
+```bash
+git clone https://github.com/vixdex/vixdex.git
+cd vixdex/hooks
+```
+
+Uniswap libraries:
+
+```bash
 forge install https://github.com/Uniswap/v4-core
 forge install https://github.com/Uniswap/v4-periphery
 forge install uniswap/v3-periphery
@@ -71,126 +91,27 @@ forge install uniswap/permit2
 forge install uniswap/universal-router
 forge install uniswap/v2-periphery
 forge install uniswap/v2-core
-
 ```
-````
 
-#### Install OpenZeppelin:
+OpenZeppelin and the Huff integration (install the Huff compiler first):
 
-`forge install OpenZeppelin/openzeppelin-contracts`
-
-#### Install Huff compiler integration
-
-before this step, install huff compiler.
-
-`forge install huff-language/foundry-huff`
-
-### Step 3: Run Forked Sepolia Network
-
-#### We’ll use anvil to fork the Ethereum Sepolia/Mainnet network:
-
-`anvil --fork-url https://ethereum-rpc.publicnode.com --chain-id 3133`
-
-
-💡 Use a unique chain ID not used by other networks to avoid MetaMask conflicts when working in client side.
-
-### Step 4: Deploy Huff Contract (Bonding Curve)
-
-`huffc src/BondingCurve.huff -b`
-
-Deploy with bytecode:
-`cast send --rpc-url <url> --private-key <private_key> --create 0x<bytecode>`
-
-This returns the BondingCurve contract address. Update your test or deployment contracts with this address.
-
-### Step 5: Deploy Volume Oracle
-
-1. Clone the vixdex-volume-oracle-node repository.
-
-2. Inside /node, install dependencies:
-
-`npm install`
-in .env change it according to yours!.
-
-
-````
+```bash
+forge install OpenZeppelin/openzeppelin-contracts
+forge install huff-language/foundry-huff
 ```
-GEKO_TERMINAL_URL="https://api.geckoterminal.com/api/v2/"
-MONGO_URI="mongodb://localhost:27017/vixdexFinance"
-RPC_URL="http://localhost:8545"
-PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" # Replace this with your bonding curve address
-ORACLE_CONTRACT="0xAa07486C20F73fF4309495411927E6AE7C884DBa" # Replace after deploy
-```
-````
 
-### Step 6: Deploy Oracle Contract Using Truffle
+Then fork a network with `anvil` and run the test suite against it.
 
-#### Go to /oracle, configure truffle-config.js for local development, then
+## Related repositories
 
-`truffle deploy`
+| | |
+|---|---|
+| [`vixdex`](https://github.com/vixdex/vixdex) | The hook and contracts |
+| [`vixdex_Interface`](https://github.com/vixdex/vixdex_Interface) | Trading interface |
+| [`vixdex-node`](https://github.com/vixdex/vixdex-node) | Node services |
+| [`vpt-price-tracker`](https://github.com/vixdex/vpt-price-tracker) | Price tracking |
 
-#### Update .env with the new oracle contract address.
+## Status
 
-### Step 7: Start the Node Server
-
-cd node
-npx nodemon index.js
-
-### Step 8: Test Oracle API
-
-#### Use Postman or terminal:
-
-    URL: http://localhost:8000/volume/uniswapV3/pool/oracle
-
-    Body:
-
-   ````
-   ```
-{
-  "chain": "eth", <your fav network>
-  "poolAddress": "0xCBCdF9626bC03E24f779434178A73a0B4bad62eD" <your fav uniswap v3 pool>
-}
-
-
-   ```
-   ````
-   You’ll receive an array of volume data. Now your oracle contract is ready.
-### Step 9: Final Contract Testing & Deployment
-
-With both BondingCurve and Volume Oracle contracts ready:
-
-Update your smart contract variables.
-
-Happy coding :)
-
-## 🛠️ Deployments
-
-### 🌐 Sepolia Testnet
-
-| Contract           | Address                                                                 |
-|--------------------|--------------------------------------------------------------------------|
-| Swap Router        | `0x5822A01d9465ce997e652ff592d0dB9604ef3dc1`                             |
-| Huff Bonding Curve | `0xCa7FF6ad2e29cc407E399946c0E4e62cca18B730`                             |
-| Vixdex Hook        | `0xa8378271B8b7394A8D2AABf47fEE58a4c1FdC8c8`                             |
-| Volume Oracle      | *(See contract address in `vixdex-volume-oracle-node` repo)*            |
-
-
-## 📄 Whitepaper
-
-You can find the official Vixdex whitepaper in the following Google Drive folder:
-
-🔗 [View Whitepaper Folder](https://drive.google.com/file/d/1BPGjieVkcxKgy1KkjHsqKZXsYwPn6Gzz/view?usp=sharing)
-
-
-## 📬 Contact
-
-If you have any questions, feedback, or are interested in contributing, feel free to reach out:
-
-- 📧 Vixdex Official Email: [social@vixdex.finance](mailto:social@vixdex.finance)  
-- 🐦 Twitter: [@vixdex_finance](https://x.com/vixdex_finance)
-
-## ⚠️ Disclaimer
-
-**Vixdex is currently under active development and is not yet production-ready but lauch in mid june on testnet**
-
-This project **has not been audited**, and may contain bugs, vulnerabilities, or unintended behaviors. By using any part of this repository or interacting with its deployed contracts, you do so **at your own risk*
+A working protocol and a prize-winning hook, not an audited production system. The pricing
+curve is explicitly designed to evolve. Do not put real money behind it without an audit.
